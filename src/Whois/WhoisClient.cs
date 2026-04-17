@@ -188,7 +188,7 @@ public partial class WhoisClient
     public static Dictionary<string, string> Parse(string response)
     {
         var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var lines = response.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+        var lines = response.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
         var comments = new StringBuilder();
         foreach (var line in lines)
         {
@@ -229,16 +229,19 @@ public partial class WhoisClient
     /// <returns>Sanitized server hostname without scheme or port.</returns>
     private static string SanitizeServer(string server)
     {
-        if (string.IsNullOrWhiteSpace(server)) return string.Empty;
+        if (string.IsNullOrWhiteSpace(server))
+        {
+            return string.Empty;
+        }
         server = server.Trim();
         if (server.StartsWith("whois://", StringComparison.OrdinalIgnoreCase))
         {
-            server = server.Substring("whois://".Length);
+            server = server["whois://".Length..];
         }
         var idx = server.IndexOf(':');
         if (idx > 0)
         {
-            server = server.Substring(0, idx);
+            server = server[..idx];
         }
         return server.Trim();
     }

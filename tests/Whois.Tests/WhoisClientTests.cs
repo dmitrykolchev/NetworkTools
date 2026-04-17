@@ -11,7 +11,7 @@ namespace Whois.Tests
         {
             var client = new WhoisClient();
             Assert.Throws<ArgumentNullException>(() => client.Query((string)null));
-            Assert.Throws<ArgumentNullException>(() => client.Query(""));
+            Assert.Throws<ArgumentException>(() => client.Query(""));
         }
 
         [Fact]
