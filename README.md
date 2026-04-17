@@ -1,65 +1,85 @@
-# NetworkTools
+# Xobex.Net.Whois
 
-Краткое описание
------------------
-NetworkTools — набор утилит для работы с сетевыми протоколами и диагностикой. Включает реализацию WHOIS-клиента и вспомогательные компоненты для выполнения сетевых запросов и разбора ответов.
+Xobex.Net.Whois is a small .NET library for performing WHOIS queries and parsing WHOIS responses. It provides an asynchronous API to query WHOIS servers over TCP and follows referral servers when present.
 
-Требования
-----------
+## Target framework
+- .NET 10
+
+## Features
+- Asynchronous WHOIS queries (QueryAsync) for domains and IP addresses
+- Follows referral (refer / whois / ReferralServer) chains up to a configurable depth
+- Simple response parser that extracts header:value pairs and collects comment lines
+
+## Getting started
+Requirements:
 - .NET 10 SDK
-- (Опционально) Microsoft Visual Studio 2026 или другой редактор с поддержкой .NET
 
-Сборка и запуск
-----------------
-1. Сборка через .NET CLI:
+Build the solution from the repository root:
 
-   - Откройте терминал в корне репозитория (C:\Projects\2026\NetworkTools).
-   - Выполните:
+```
+dotnet build
+```
 
-     dotnet build
+## Using the library
+The library exposes a single primary API surface: the WhoisClient class.
 
-   - Если в репозитории есть исполняемый проект, запустите его командой (замените путь на реальный путь к проекту):
-
-     dotnet run --project <путь_к_проекту.csproj>
-
-2. Запуск из Visual Studio:
-
-   - Откройте решение в Visual Studio 2026.
-   - Установите проект запускаемый (Set as Startup Project) и нажмите F5/Запустить.
-
-Пример использования WHOIS-клиента
----------------------------------
-Если вы хотите быстро протестировать WHOIS-клиент из своего кода, создайте консольный проект и добавьте ссылку на проект с клиентом. Пример кода (Program.cs):
+Example (async usage):
 
 ```csharp
 using System;
 using System.Net;
-using Whois;
+using System.Threading;
+using Xobex.Net.Whois;
 
-class Program
+class Example
 {
-    static void Main()
+    public static async Task Main()
     {
         var client = new WhoisClient();
-        var ip = IPAddress.Parse("8.8.8.8");
-        var response = client.Query(ip);
-        Console.WriteLine(response);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+        // Query by domain or IP (string overload)
+        string raw = await client.QueryAsync("8.8.8.8", cts.Token);
+
+        // Or query by IPAddress
+        // var raw = await client.QueryAsync(IPAddress.Parse("8.8.8.8"), cts.Token);
+
+        // Parse into key/value pairs
+        var fields = WhoisClient.Parse(raw);
+
+        Console.WriteLine("Raw response:\n" + raw);
+        Console.WriteLine("Parsed fields:");
+        foreach (var kv in fields)
+        {
+            Console.WriteLine($"{kv.Key}: {kv.Value}");
+        }
     }
 }
 ```
 
-Создайте проект, добавьте ссылку на проект с WhoisClient и запустите.
+## Example project (console)
+This repository includes a small example console application in src/Whois that demonstrates using the library. To run the example use:
 
-Тесты
------
-Если в репозитории есть тестовый проект, запустите все тесты так:
+```
+dotnet run --project src/Whois/Whois.csproj -- 8.8.8.8
+```
 
-  dotnet test
+Replace 8.8.8.8 with the address or domain you want to query.
 
-Поддержка и вклад
------------------
-Если хотите внести правки или обнаружили баг — откройте issue или pull request в используемой системе контроля версий.
+## Notes on behavior
+- QueryAsync performs network I/O and may throw OperationCanceledException, TimeoutException or SocketException. Handle these in your calling code.
+- Parse returns a case-insensitive dictionary where the last seen header value wins. Comment lines are collected under the #comments key.
+- The client follows referrals up to a fixed maximum depth to avoid infinite loops.
 
-Лицензия
---------
-Уточните лицензию проекта в соответствующем файле LICENSE (если есть).
+## Running tests
+Run unit tests with:
+
+```
+dotnet test
+```
+
+## Contributing
+Contributions welcome — open issues or pull requests.
+
+## License
+See LICENSE file if present in the repository.
