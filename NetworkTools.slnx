@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="src/Whois/Whois.csproj" />
+  <Project Path="tests/Whois.Tests/Whois.Tests.csproj" />
 </Solution>
