@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Whois": {
+      "commandName": "Project",
+      "commandLineArgs": "185.73.194.82"
+    }
+  }
+}
