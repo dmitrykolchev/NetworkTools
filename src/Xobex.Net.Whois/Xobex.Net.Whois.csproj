@@ -10,10 +10,16 @@
     <Description>A WHOIS client written in C# (.NET 10) is a high-performance network tool designed to query registration records for domain names and IP addresses. Leveraging the latest C# 14 features and .NET 10's networking enhancements, this client provides a lightweight, asynchronous way to retrieve registry information from WHOIS servers on TCP port 43</Description>
     <Copyright>Dmitry Kolchev</Copyright>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://</RepositoryUrl>
+    <RepositoryUrl>https://github.com/dmitrykolchev/NetworkTools</RepositoryUrl>
+    <PackageTags>net; whois</PackageTags>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
