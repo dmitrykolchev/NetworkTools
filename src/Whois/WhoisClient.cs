@@ -102,7 +102,7 @@ public partial class WhoisClient
     /// <param name="query">The query string to send.</param>
     /// <param name="depth">Current recursion depth used to limit referrals.</param>
     /// <returns>The raw WHOIS response text from the final server.</returns>
-    public static string QueryRecursive(string server, int port, string query, int depth = 0)
+    private static string QueryRecursive(string server, int port, string query, int depth = 0)
     {
         string response = SendRequest(server, port, query);
 
@@ -196,7 +196,7 @@ public partial class WhoisClient
             {
                 continue;
             }
-            if (line[0] == '%')
+            if (line[0] is ('%' or '#' or ';'))
             {
                 _ = comments.AppendLine(line);
                 continue;
