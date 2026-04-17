@@ -7,21 +7,39 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        string? ip = args[0];
-        if (string.IsNullOrWhiteSpace(ip))
+        string? addressOrName = args[0];
+        if (string.IsNullOrWhiteSpace(addressOrName))
         {
             Console.WriteLine("Ошибка: IP не может быть пустым.");
             return;
         }
-        Console.WriteLine($"Target address: {ip}");
-        var address = IPAddress.Parse(ip); // Проверка валидности IP
         var client = new WhoisClient();
-        string result = await client.QueryAsync(address, CancellationToken.None);
-        var whoisInfo = WhoisClient.Parse(result);
-
+        string result;
+        if (IPAddress.TryParse(addressOrName, out IPAddress? address))
+        {
+            // If IP-address, query the IP
+            Console.WriteLine($"Queried address: {address}");
+            result = await client.QueryAsync(address, CancellationToken.None);
+        }
+        else
+        {
+            Console.WriteLine($"Queried name: {address}");
+            result = await client.QueryAsync(addressOrName, CancellationToken.None);
+        }
+        Console.WriteLine("Original Whois response");
+        Console.WriteLine("=======================");
+        Console.WriteLine();
         Console.WriteLine(result);
-    }
 
+        var whoisInfo = WhoisClient.Parse(result);
+        Console.WriteLine("Parsed Whois information");
+        Console.WriteLine("========================");
+        Console.WriteLine();
+        foreach (var item in whoisInfo)
+        {
+            Console.WriteLine($"{item.Key}:\t{item.Value}");
+        }
+    }
 }
 
 
