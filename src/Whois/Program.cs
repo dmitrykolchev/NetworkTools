@@ -4,7 +4,7 @@ namespace Whois;
 
 internal class Program
 {
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
         string? ip = args[0];
         if (string.IsNullOrWhiteSpace(ip))
@@ -15,7 +15,7 @@ internal class Program
         Console.WriteLine($"Target address: {ip}");
         var address = IPAddress.Parse(ip); // Проверка валидности IP
         var client = new WhoisClient();
-        string result = client.Query(address);
+        string result = await client.QueryAsync(address, CancellationToken.None);
         var whoisInfo = WhoisClient.Parse(result);
 
         Console.WriteLine(result);

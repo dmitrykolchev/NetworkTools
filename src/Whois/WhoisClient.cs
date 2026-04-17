@@ -76,10 +76,10 @@ public partial class WhoisClient
     /// <param name="query">The query string (domain name or IP) to send to the WHOIS server.</param>
     /// <returns>The raw WHOIS response text.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="query"/> is null or empty.</exception>
-    public string Query(string query)
+    public Task<string> QueryAsync(string query, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(query);
-        return QueryRecursive(_initialServer, _port, query);
+        return QueryRecursiveAsync(_initialServer, _port, query, 0, cancellationToken);
     }
 
     /// <summary>
@@ -88,9 +88,10 @@ public partial class WhoisClient
     /// </summary>
     /// <param name="address">The IP address to query.</param>
     /// <returns>The raw WHOIS response text.</returns>
-    public string Query(IPAddress address)
+    public Task<string> QueryAsync(IPAddress address, CancellationToken cancellationToken)
     {
-        return QueryRecursive(_initialServer, _port, address.ToString());
+        ArgumentNullException.ThrowIfNull(address);
+        return QueryRecursiveAsync(_initialServer, _port, address.ToString(), 0, cancellationToken);
     }
 
     /// <summary>
@@ -102,9 +103,9 @@ public partial class WhoisClient
     /// <param name="query">The query string to send.</param>
     /// <param name="depth">Current recursion depth used to limit referrals.</param>
     /// <returns>The raw WHOIS response text from the final server.</returns>
-    private static string QueryRecursive(string server, int port, string query, int depth = 0)
+    private static async Task<string> QueryRecursiveAsync(string server, int port, string query, int depth, CancellationToken cancellationToken)
     {
-        string response = SendRequest(server, port, query);
+        string response = await SendRequestAsync(server, port, query, cancellationToken);
 
         // Ограничение глубины рекурсии перенаправлений
         if (depth >= MaxReferralDepth)
@@ -122,40 +123,29 @@ public partial class WhoisClient
             var normalizedNext = NormalizeServerName(nextServer);
             if (!string.Equals(normalizedNext, normalizedCurrent, StringComparison.OrdinalIgnoreCase))
             {
-                return QueryRecursive(nextServer, port, query, depth + 1);
+                return await QueryRecursiveAsync(nextServer, port, query, depth + 1, cancellationToken);
             }
         }
 
         return response;
     }
 
-    private static string SendRequest(string server, int port, string query)
+    private static async Task<string> SendRequestAsync(string server, int port, string query, CancellationToken cancellationToken)
     {
-        try
-        {
-            using var client = new TcpClient();
-            // Устанавливаем тайм-аут на подключение и на чтение, чтобы не ждать вечно
-            var connectTask = client.ConnectAsync(server, port);
-            if (!connectTask.Wait(ConnectTimeout))
-            {
-                throw new TimeoutException($"Тайм-аут подключения к {server}:{port}");
-            }
-            client.ReceiveTimeout = ReceiveTimeout;
-            client.SendTimeout = ConnectTimeout;
+        using var client = new TcpClient();
+        // Устанавливаем тайм-аут на подключение и на чтение, чтобы не ждать вечно
+        await client.ConnectAsync(server, port).WaitAsync(TimeSpan.FromMilliseconds(ConnectTimeout), cancellationToken);
+        client.ReceiveTimeout = ReceiveTimeout;
+        client.SendTimeout = ConnectTimeout;
 
-            using NetworkStream stream = client.GetStream();
-            byte[] queryBytes = Encoding.ASCII.GetBytes($"{query}\r\n");
-            stream.Write(queryBytes, 0, queryBytes.Length);
+        using NetworkStream stream = client.GetStream();
+        byte[] queryBytes = Encoding.ASCII.GetBytes($"{query}\r\n");
+        await stream.WriteAsync(queryBytes, 0, queryBytes.Length, cancellationToken);
 
-            // Большинство whois-серверов используют ASCII/Latin1. Читаем как ASCII для предсказуемости.
-            using var reader = new StreamReader(stream, Encoding.ASCII);
-            var response = reader.ReadToEnd();
-            return response;
-        }
-        catch (Exception ex)
-        {
-            return $"[Ошибка при подключении к {server}]: {ex.Message}";
-        }
+        // Большинство whois-серверов используют ASCII/Latin1. Читаем как ASCII для предсказуемости.
+        using var reader = new StreamReader(stream, Encoding.ASCII);
+        var response = await reader.ReadToEndAsync(cancellationToken);
+        return response;
     }
 
     /// <summary>
