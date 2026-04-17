@@ -3,11 +3,13 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Whois;
+namespace Xobex.Net.Whois;
 
 /// <summary>
-/// A small WHOIS client capable of querying WHOIS servers over TCP and
-/// following referral servers (refer/whois) recursively.
+/// A small WHOIS client library capable of querying WHOIS servers over TCP.
+/// The client exposes asynchronous methods that perform network I/O and
+/// follow referral servers (refer/whois) recursively. Network and cancellation
+/// related errors are propagated as exceptions to the caller.
 /// </summary>
 public partial class WhoisClient
 {
@@ -73,12 +75,17 @@ public partial class WhoisClient
         QueryAsync(query, CancellationToken.None);
 
     /// <summary>
-    /// Performs a WHOIS query for the provided query string starting from the
-    /// configured initial server and following referrals if necessary.
+    /// Performs an asynchronous WHOIS query for the provided query string starting
+    /// from the configured initial server and following referrals if necessary.
     /// </summary>
     /// <param name="query">The query string (domain name or IP) to send to the WHOIS server.</param>
+    /// <param name="cancellationToken">Cancellation token used to cancel the operation.</param>
     /// <returns>The raw WHOIS response text.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="query"/> is null or empty.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="query"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="query"/> is an empty string.</exception>
+    /// <exception cref="OperationCanceledException">Thrown when <paramref name="cancellationToken"/> is canceled.</exception>
+    /// <exception cref="TimeoutException">Thrown when the TCP connection times out.</exception>
+    /// <exception cref="System.Net.Sockets.SocketException">Thrown for socket-level errors during connect.</exception>
     public Task<string> QueryAsync(string query, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(query);
@@ -89,11 +96,14 @@ public partial class WhoisClient
         QueryAsync(address, CancellationToken.None);
 
     /// <summary>
-    /// Performs a WHOIS query for the provided IP address starting from the
-    /// configured initial server and following referrals if necessary.
+    /// Performs an asynchronous WHOIS query for the provided IP address starting
+    /// from the configured initial server and following referrals if necessary.
     /// </summary>
     /// <param name="address">The IP address to query.</param>
+    /// <param name="cancellationToken">Cancellation token used to cancel the operation.</param>
     /// <returns>The raw WHOIS response text.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="address"/> is null.</exception>
+    /// <exception cref="OperationCanceledException">Thrown when <paramref name="cancellationToken"/> is canceled.</exception>
     public Task<string> QueryAsync(IPAddress address, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(address);
@@ -101,14 +111,18 @@ public partial class WhoisClient
     }
 
     /// <summary>
-    /// Internal recursive method that sends the WHOIS request to a server
+    /// Internal recursive asynchronous method that sends the WHOIS request to a server
     /// and follows referral servers up to a maximum depth.
     /// </summary>
     /// <param name="server">The WHOIS server to query.</param>
     /// <param name="port">The TCP port to use.</param>
     /// <param name="query">The query string to send.</param>
     /// <param name="depth">Current recursion depth used to limit referrals.</param>
+    /// <param name="cancellationToken">Cancellation token used to cancel the operation.</param>
     /// <returns>The raw WHOIS response text from the final server.</returns>
+    /// <exception cref="OperationCanceledException">Thrown when <paramref name="cancellationToken"/> is canceled.</exception>
+    /// <exception cref="TimeoutException">Thrown when a connection attempt times out.</exception>
+    /// <exception cref="System.Net.Sockets.SocketException">Thrown for socket-level errors during connect or write/read.</exception>
     private static async Task<string> QueryRecursiveAsync(string server, int port, string query, int depth, CancellationToken cancellationToken)
     {
         string response = await SendRequestAsync(server, port, query, cancellationToken);
@@ -136,6 +150,17 @@ public partial class WhoisClient
         return response;
     }
 
+    /// <summary>
+    /// Sends a single WHOIS request asynchronously to the specified server and returns the raw response.
+    /// </summary>
+    /// <param name="server">The WHOIS server to connect to.</param>
+    /// <param name="port">The TCP port to use.</param>
+    /// <param name="query">The query string to send.</param>
+    /// <param name="cancellationToken">Cancellation token used to cancel the operation.</param>
+    /// <returns>The raw server response.</returns>
+    /// <exception cref="OperationCanceledException">Thrown when <paramref name="cancellationToken"/> is canceled.</exception>
+    /// <exception cref="TimeoutException">Thrown when the TCP connection times out.</exception>
+    /// <exception cref="System.Net.Sockets.SocketException">Thrown for socket-level errors during connect or write/read.</exception>
     private static async Task<string> SendRequestAsync(string server, int port, string query, CancellationToken cancellationToken)
     {
         using var client = new TcpClient();
@@ -145,8 +170,8 @@ public partial class WhoisClient
         client.SendTimeout = ConnectTimeout;
 
         using NetworkStream stream = client.GetStream();
-        byte[] queryBytes = Encoding.ASCII.GetBytes($"{query}\r\n");
-        await stream.WriteAsync(queryBytes, 0, queryBytes.Length, cancellationToken);
+        var queryBytes = Encoding.ASCII.GetBytes($"{query}\r\n");
+        await stream.WriteAsync(queryBytes, cancellationToken);
 
         // Большинство whois-серверов используют ASCII/Latin1. Читаем как ASCII для предсказуемости.
         using var reader = new StreamReader(stream, Encoding.ASCII);
@@ -157,9 +182,12 @@ public partial class WhoisClient
     /// <summary>
     /// Extracts a referral server (refer, whois, referralserver) from a WHOIS response.
     /// Returns the sanitized server hostname or null when no referral is present.
+    /// This method does not perform network I/O and will not throw for normal input; it may throw
+    /// an <see cref="ArgumentNullException"/> if <paramref name="response"/> is null.
     /// </summary>
     /// <param name="response">The raw WHOIS response text.</param>
     /// <returns>Sanitized referral server hostname or null.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="response"/> is null.</exception>
     private static string? ExtractReferralServer(string response)
     {
         // Регулярное выражение для поиска полей refer, whois или referralserver

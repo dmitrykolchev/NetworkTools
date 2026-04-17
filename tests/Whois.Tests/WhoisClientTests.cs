@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Xobex.Net.Whois;
 using Xunit;
 
 namespace Whois.Tests;

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Xobex.Net.Whois;
 
 namespace Whois;
 
