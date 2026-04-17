@@ -12,6 +12,7 @@ internal class Program
             Console.WriteLine("Ошибка: IP не может быть пустым.");
             return;
         }
+        Console.WriteLine($"Target address: {ip}");
         var address = IPAddress.Parse(ip); // Проверка валидности IP
         var client = new WhoisClient();
         string result = client.Query(address);
