@@ -69,6 +69,9 @@ public partial class WhoisClient
         _port = port;
     }
 
+    public Task<string> QueryAsync(string query) =>
+        QueryAsync(query, CancellationToken.None);
+
     /// <summary>
     /// Performs a WHOIS query for the provided query string starting from the
     /// configured initial server and following referrals if necessary.
@@ -81,6 +84,9 @@ public partial class WhoisClient
         ArgumentNullException.ThrowIfNullOrEmpty(query);
         return QueryRecursiveAsync(_initialServer, _port, query, 0, cancellationToken);
     }
+
+    public Task<string> QueryAsync(IPAddress address) =>
+        QueryAsync(address, CancellationToken.None);
 
     /// <summary>
     /// Performs a WHOIS query for the provided IP address starting from the
@@ -186,7 +192,7 @@ public partial class WhoisClient
             {
                 continue;
             }
-            if (line[0] is ('%' or '#' or ';'))
+            if (line[0] is '%' or '#' or ';')
             {
                 _ = comments.AppendLine(line);
                 continue;
