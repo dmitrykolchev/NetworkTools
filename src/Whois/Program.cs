@@ -7,6 +7,11 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("whois domainname|address");
+            return;
+        }
         string? addressOrName = args[0];
         if (string.IsNullOrWhiteSpace(addressOrName))
         {
@@ -23,7 +28,8 @@ internal class Program
         }
         else
         {
-            Console.WriteLine($"Queried name: {address}");
+            Console.WriteLine($"Queried name: {addressOrName}");
+            Console.WriteLine();
             result = await client.QueryAsync(addressOrName, CancellationToken.None);
         }
         Console.WriteLine("Original Whois response");
