@@ -2,9 +2,11 @@
   <Folder Name="/Generation/">
     <File Path="src/Wpf/generate.ps1" />
     <File Path="src/Wpf/ike.rsp" />
+    <File Path="src/Wpf/iphlpapi.rsp" />
     <File Path="src/Wpf/ipsec.rsp" />
     <File Path="src/Wpf/wfp.c" />
     <File Path="src/Wpf/wfp.rsp" />
+    <File Path="src/Wpf/winbase.rsp" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Managed.Wfp/Managed.Wfp.csproj" Id="a8e312ab-543f-4896-9ff6-88d09dd12341" />

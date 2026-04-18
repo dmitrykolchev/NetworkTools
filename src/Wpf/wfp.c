@@ -3,3 +3,4 @@
 #include <ipsectypes.h>
 #include <iketypes.h>
 #include <fwpmtypes.h>
+#include <iphlpapi.h>

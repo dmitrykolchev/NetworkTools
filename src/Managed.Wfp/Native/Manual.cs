@@ -2,6 +2,57 @@
 
 namespace Managed.Win32.Native;
 
+[System.Runtime.CompilerServices.InlineArray(14)]
+public struct ByteBuffer14
+{
+    private byte _element0; // Тип элемента
+}
+
+[StructLayout(LayoutKind.Sequential)]
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
+public struct sockaddr
+#pragma warning restore CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
+{
+    public ushort sa_family;              /* address family */
+    public ByteBuffer14 sa_data;          /* up to 14 bytes of direct address */
+};
+
+
+[StructLayout(LayoutKind.Sequential)]
+public partial struct _MIB_OPAQUE_INFO
+{
+    [NativeTypeName("DWORD")]
+    public uint dwId;
+
+    public ulong ullAlign;
+
+    public unsafe byte* rgbyData
+    {
+        get
+        {
+            fixed (void* ptr = &ullAlign) return (byte*)ptr;
+        }
+    }
+}
+
+
+[System.Runtime.CompilerServices.InlineArray(15)]
+public struct NUIntBuffer15
+{
+    private byte _element0; // Тип элемента
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public unsafe struct _EXCEPTION_RECORD
+{
+    public uint ExceptionCode;
+    public uint ExceptionFlags;
+    public _EXCEPTION_RECORD *ExceptionRecord;
+    public void* ExceptionAddress;
+    public uint NumberParameters;
+    public NUIntBuffer15 ExceptionInformation;
+}
+
 [System.Runtime.CompilerServices.InlineArray(6)]
 public struct ByteBuffer6
 {

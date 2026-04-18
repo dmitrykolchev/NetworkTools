@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Using Include="Managed.Win32.WinBase.Native" />
 		<Using Include="Managed.Win32.Native" />
 		<Using Include="Managed.Win32.Ike.Native" />
 		<Using Include="Managed.Win32.Ipsec.Native" />
