@@ -1,66 +1,67 @@
-﻿using Managed.Win32.IpHlpApi.Native;
-using System.Net;
+// <copyright file="RoutingTable.cs" company="Dmitry Kolchev">
+// Copyright (c) 2026 Dmitry Kolchev. All rights reserved.
+// See LICENSE in the project root for license information
+// </copyright>
+
 using System.Net.Sockets;
-using TerraFX.Interop.Windows;
+using Managed.Win32.IpHlpApi.Native;
 using static Managed.Win32.IpHlpApi.Native.Methods;
 
 namespace Xobex.Net.Routing;
 
-public class RoutingTable
+public unsafe class RoutingTable : IDisposable
 {
+    private _MIB_IPFORWARD_TABLE2* _table;
 
-    public unsafe void GetEntires()
+    private RoutingTable(_MIB_IPFORWARD_TABLE2* table)
     {
-        _MIB_IPFORWARD_TABLE2* Table;
-        uint status = GetIpForwardTable2((ushort)AddressFamily.Unspecified, &Table);
+        ArgumentNullException.ThrowIfNull(table);
+        _table = table;
+    }
+
+    ~RoutingTable()
+    {
+        Dispose();
+    }
+
+    public void Dispose()
+    {
+        if (_table != null)
+        {
+            FreeMibTable(_table);
+            _table = null;
+        }
+    }
+
+    public int Count => (int)_table->NumEntries;
+
+    public static RoutingTable GetRoutingTable()
+    {
+        _MIB_IPFORWARD_TABLE2* table;
+        var status = GetIpForwardTable2((ushort)AddressFamily.Unspecified, &table);
         if (status != 0)
         {
-            throw new Exception($"GetIpForwardTable2 failed with error code {status}");
+            throw new InvalidOperationException($"GetIpForwardTable2 failed with error code {status}");
         }
-        for(uint i=0; i< Table->NumEntries; i++)
+        var routingTable = new RoutingTable(table);
+        return routingTable;
+    }
+
+    private ref _MIB_IPFORWARD_ROW2 GetRow(uint index)
+    {
+        if (index >= Count)
         {
-            ref _MIB_IPFORWARD_ROW2 row = ref Table->Table[(int)i];
-
-            // Определяем адрес назначения
-            if (row.DestinationPrefix.Prefix.Ipv4.sin_family == (ushort)AddressFamily.InterNetwork)
-            {
-                fixed (void* ptr = &row.DestinationPrefix.Prefix.Ipv4.sin_addr)
-                {
-                    IPAddress addr = new IPAddress(new Span<byte>(ptr, 4));
-                    string prefix = $"{addr}/{row.DestinationPrefix.PrefixLength}";
-                    Console.Write($"IPv4: {prefix,-20}");
-                }
-            }
-            else
-            {
-                fixed (void* ptr = &row.DestinationPrefix.Prefix.Ipv6.sin6_addr)
-                {
-                    IPAddress addr = new IPAddress(new Span<byte>(ptr, sizeof(in6_addr)));
-                    string prefix = $"{addr}/{row.DestinationPrefix.PrefixLength}";
-                    Console.Write($"IPv6: {prefix,-20}");
-                }
-            }
-
-            // Вывод шлюза (Next Hop)
-            if (row.NextHop.Ipv4.sin_family == AF_INET)
-            {
-                fixed (void* ptr = &row.NextHop.Ipv4.sin_addr)
-                {
-                    IPAddress addr = new IPAddress(new Span<byte>(ptr, 4));
-                    Console.Write($" NextHop: {addr,-20}");
-                }
-            }
-            else
-            {
-                fixed (void* ptr = &row.NextHop.Ipv6.sin6_addr)
-                {
-                    IPAddress addr = new IPAddress(new Span<byte>(ptr, sizeof(in6_addr)));
-                    Console.Write($" NextHop: {addr,-20}");
-                }
-            }
-
-            Console.WriteLine($" IF: {row.InterfaceIndex,-4} METRIC: {row.Metric,-4}");
+            throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} is out of range. The routing table contains {Count} entries.");
         }
-        FreeMibTable(Table);
+        return ref _table->Table[(int)index];
+    }
+
+    public IEnumerable<RoutingTableEntry> GetEntires()
+    {
+        for (uint i = 0; i < Count; i++)
+        {
+            ref var row = ref GetRow(i);
+            yield return new(ref row);
+        }
     }
 }

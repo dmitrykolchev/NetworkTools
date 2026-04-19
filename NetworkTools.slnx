@@ -8,6 +8,9 @@
     <File Path="src/Wpf/wfp.rsp" />
     <File Path="src/Wpf/winbase.rsp" />
   </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Managed.Wfp/Managed.Wfp.csproj" Id="a8e312ab-543f-4896-9ff6-88d09dd12341" />
     <Project Path="src/Xobex.Net.Routing/Xobex.Net.Routing.csproj" />
