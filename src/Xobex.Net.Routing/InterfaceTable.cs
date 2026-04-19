@@ -35,7 +35,7 @@ public class InterfaceTable : IEnumerable<InterfaceEntry>
         {
             if (table is null || table->NumEntries == 0)
             {
-                return new InterfaceTable(Array.Empty<InterfaceEntry>());
+                return new InterfaceTable([]);
             }
             // Выполняем копирование в управляемый массив сразу
             var entries = new InterfaceEntry[table->NumEntries];

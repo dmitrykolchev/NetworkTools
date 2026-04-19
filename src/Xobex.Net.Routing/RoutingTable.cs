@@ -36,7 +36,7 @@ public sealed class RoutingTable : IEnumerable<RoutingTableEntry>
         {
             if (table is null || table->NumEntries == 0)
             {
-                return new RoutingTable(Array.Empty<RoutingTableEntry>());
+                return new RoutingTable([]);
             }
             // Выполняем копирование в управляемый массив сразу
             var entries = new RoutingTableEntry[table->NumEntries];
