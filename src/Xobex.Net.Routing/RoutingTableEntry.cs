@@ -75,4 +75,9 @@ public class RoutingTableEntry
     public int Metric => _metric;
 
     public string Type => IPv4 ? "IPv4" : "IPv6";
+
+    public override string ToString()
+    {
+        return $"| {Type} | {Prefix,-40} | {NextHop,-36} | {InterfaceIndex,-3} | {Metric,-3} |";
+    }
 }

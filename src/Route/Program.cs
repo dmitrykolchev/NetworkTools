@@ -38,5 +38,18 @@ internal class Program
             }
             Console.WriteLine($"| {entry.Type} | {entry.Prefix,-40} | {entry.NextHop,-36} | {entry.InterfaceIndex,-3} | {entry.Metric,-3} |");
         }
+
+        using var watcher = new MyWatcher();
+        watcher.Start();
+        Console.WriteLine("Press Enter to stop watching for route changes...");
+        Console.ReadLine();
+    }
+}
+
+public class MyWatcher : RouteWatcher
+{
+    protected override void OnRouteChange(RoutingTableEntry? row, NotificationType type)
+    {
+        Console.WriteLine($"{type}\n\t{row}");
     }
 }
