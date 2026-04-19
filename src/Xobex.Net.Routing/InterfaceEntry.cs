@@ -4,7 +4,6 @@
 // </copyright>
 
 using System.Diagnostics;
-using System.Globalization;
 using Managed.Wfp;
 using Managed.Win32.IpHlpApi.Native;
 using static Managed.Win32.IpHlpApi.Native.Methods;
@@ -26,17 +25,13 @@ public enum InterfaceFlags : byte
 }
 
 [DebuggerDisplay("{Index}: {Alias}")]
-public readonly record struct InterfaceEntry
+public sealed class InterfaceEntry
 {
     private readonly _MIB_IF_ROW2 _row;
 
     internal InterfaceEntry(ref _MIB_IF_ROW2 row)
     {
         _row = row;
-        ReadOnlySpan<char> buffer = _row.Alias;
-        Alias = buffer[..buffer.IndexOf('\0')].ToString();
-        buffer = _row.Description;
-        Description = buffer[..buffer.IndexOf('\0')].ToString();
         if (row.PhysicalAddressLength > 0)
         {
             var address = _row.PhysicalAddress;
@@ -74,18 +69,19 @@ public readonly record struct InterfaceEntry
 
     public byte[] PhysicalAddress { get; }
 
-    public string PhysicalAddressString
+    public string PhysicalAddressString => PhysicalAddress.Length > 0
+           ? BitConverter.ToString(PhysicalAddress).Replace("-", ":")
+           : string.Empty;
+
+    public string Alias => field ??= GetStringFromBuffer(_row.Alias);
+
+    public string Description => field ??= GetStringFromBuffer(_row.Description);
+
+    private static string GetStringFromBuffer(ReadOnlySpan<char> buffer)
     {
-        get
-        {
-            ReadOnlySpan<byte> buffer = _row.PhysicalAddress;
-            return string.Join(":", buffer[..(int)_row.PhysicalAddressLength].ToArray().Select(b => b.ToString("X2", CultureInfo.InvariantCulture)));
-        }
+        var len = buffer.IndexOf('\0');
+        return len >= 0 ? buffer[..len].ToString() : buffer.ToString();
     }
-
-    public string Alias { get; }
-
-    public string Description { get; }
 
     public AccessType AccessType => (AccessType)_row.AccessType;
 

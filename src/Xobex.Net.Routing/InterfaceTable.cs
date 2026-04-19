@@ -21,7 +21,7 @@ public class InterfaceTable : IEnumerable<InterfaceEntry>
 
     public int Count => _table.Length;
 
-    public ref readonly InterfaceEntry this[int index] => ref _table[index];
+    public InterfaceEntry this[int index] => _table[index];
 
     public static unsafe InterfaceTable GetInterfaceTable()
     {
