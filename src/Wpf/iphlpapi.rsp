@@ -1,3 +1,6 @@
+--define-macro
+_WIN32_WINNT=0x0600
+WINVER=0x0600
 --libraryPath
 iphlpapi
 -n
@@ -18,6 +21,11 @@ C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\IPExport.h
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\IPTypes.h
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ifdef.h
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ipifcons.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\netioapi.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2ipdef.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\in6addr.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ws2def.h
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\inaddr.h
 --config
 single-file
 latest-codegen 
@@ -106,5 +114,9 @@ _SID_AND_ATTRIBUTES=SID_AND_ATTRIBUTES
 _SID=SID
 FWP_BYTE_BLOB_=FWP_BYTE_BLOB
 HIFTIMESTAMPCHANGE__=void
+_NDIS_MEDIUM=int
+_NDIS_PHYSICAL_MEDIUM=int
+TCP_ESTATS_TYPE=int
 --exclude
 _MIB_OPAQUE_INFO
+IN6_ARE_ADDR_EQUAL

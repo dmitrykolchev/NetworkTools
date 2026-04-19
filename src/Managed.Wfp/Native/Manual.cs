@@ -47,7 +47,7 @@ public unsafe struct _EXCEPTION_RECORD
 {
     public uint ExceptionCode;
     public uint ExceptionFlags;
-    public _EXCEPTION_RECORD *ExceptionRecord;
+    public _EXCEPTION_RECORD* ExceptionRecord;
     public void* ExceptionAddress;
     public uint NumberParameters;
     public NUIntBuffer15 ExceptionInformation;
