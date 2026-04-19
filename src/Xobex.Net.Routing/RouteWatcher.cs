@@ -19,6 +19,7 @@ public abstract class RouteWatcher : IDisposable
     private GCHandle _instanceHandle;
     private readonly Channel<RouteUpdate> _eventChannel;
     private readonly CancellationTokenSource _cts;
+    private readonly Lock _syncLock = new();
 
     protected RouteWatcher()
     {
@@ -34,32 +35,35 @@ public abstract class RouteWatcher : IDisposable
 
     public unsafe void Start(AddressFamily addressFamily = AddressFamily.Unspecified, bool initialNotification = false)
     {
-        if (_notifyHandle != IntPtr.Zero)
+        lock (_syncLock)
         {
-            return;
-        }
-
-        _instanceHandle = GCHandle.Alloc(this);
-        void* handle;
-
-        var status = NotifyRouteChange2(
-            (ushort)addressFamily,
-            &NativeCallback,
-            (void*)GCHandle.ToIntPtr(_instanceHandle),
-            initialNotification ? (byte)1 : (byte)0,
-            &handle);
-
-        if (status != 0)
-        {
-            if (_instanceHandle.IsAllocated)
+            if (_notifyHandle != IntPtr.Zero)
             {
-                _instanceHandle.Free();
+                return;
             }
 
-            throw new InvalidOperationException($"Failed to start route watcher. Error code: {status}");
-        }
+            _instanceHandle = GCHandle.Alloc(this);
+            void* handle;
 
-        _notifyHandle = (IntPtr)handle;
+            var status = NotifyRouteChange2(
+                (ushort)addressFamily,
+                &NativeCallback,
+                (void*)GCHandle.ToIntPtr(_instanceHandle),
+                initialNotification ? (byte)1 : (byte)0,
+                &handle);
+
+            if (status != 0)
+            {
+                if (_instanceHandle.IsAllocated)
+                {
+                    _instanceHandle.Free();
+                }
+
+                throw new InvalidOperationException($"Failed to start route watcher. Error code: {status}");
+            }
+
+            _notifyHandle = (IntPtr)handle;
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
@@ -120,25 +124,29 @@ public abstract class RouteWatcher : IDisposable
 
     public void Dispose()
     {
-        GC.SuppressFinalize(this);
-        _cts.Cancel();
-
-        unsafe
+        lock (_syncLock)
         {
-            if (_notifyHandle != IntPtr.Zero)
+            if (_notifyHandle == IntPtr.Zero)
             {
-                // Вызов синхронный, после него новые колбэки не начнутся
-                _ = CancelMibChangeNotify2(_notifyHandle.ToPointer());
-                _notifyHandle = IntPtr.Zero;
+                return;
             }
-        }
 
-        if (_instanceHandle.IsAllocated)
-        {
-            _instanceHandle.Free();
-        }
+            _cts.Cancel();
 
-        _cts.Dispose();
+            unsafe
+            {
+                _ = CancelMibChangeNotify2(_notifyHandle.ToPointer());
+            }
+            _notifyHandle = IntPtr.Zero;
+
+            if (_instanceHandle.IsAllocated)
+            {
+                _instanceHandle.Free();
+            }
+
+            _cts.Dispose();
+            GC.SuppressFinalize(this);
+        }
     }
 
     ~RouteWatcher() => Dispose();
