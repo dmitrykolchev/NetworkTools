@@ -26,14 +26,28 @@ public enum InterfaceFlags : byte
 }
 
 [DebuggerDisplay("{Index}: {Alias}")]
-public class InterfaceEntry
+public readonly record struct InterfaceEntry
 {
-    private _MIB_IF_ROW2 _row;
+    private readonly _MIB_IF_ROW2 _row;
 
     internal InterfaceEntry(ref _MIB_IF_ROW2 row)
     {
         _row = row;
+        ReadOnlySpan<char> buffer = _row.Alias;
+        Alias = buffer[..buffer.IndexOf('\0')].ToString();
+        buffer = _row.Description;
+        Description = buffer[..buffer.IndexOf('\0')].ToString();
+        if (row.PhysicalAddressLength > 0)
+        {
+            var address = _row.PhysicalAddress;
+            PhysicalAddress = address[..(int)_row.PhysicalAddressLength].ToArray();
+        }
+        else
+        {
+            PhysicalAddress = Array.Empty<byte>();
+        }
     }
+
     public InterfaceFlags Flags => (InterfaceFlags)_row.InterfaceAndOperStatusFlags._bitfield;
     public int Index => (int)_row.InterfaceIndex;
     public Guid Guid => _row.InterfaceGuid;
@@ -58,14 +72,7 @@ public class InterfaceEntry
     public ulong OutBroadcastOctets => _row.OutBroadcastOctets;
     public ulong OutQLen => _row.OutQLen;
 
-    public byte[] PhysicalAddress
-    {
-        get
-        {
-            ReadOnlySpan<byte> buffer = _row.PhysicalAddress;
-            return buffer[..(int)_row.PhysicalAddressLength].ToArray();
-        }
-    }
+    public byte[] PhysicalAddress { get; }
 
     public string PhysicalAddressString
     {
@@ -76,23 +83,9 @@ public class InterfaceEntry
         }
     }
 
-    public string Alias
-    {
-        get
-        {
-            ReadOnlySpan<char> buffer = _row.Alias;
-            return buffer[..buffer.IndexOf('\0')].ToString();
-        }
-    }
+    public string Alias { get; }
 
-    public string Description
-    {
-        get
-        {
-            ReadOnlySpan<char> buffer = _row.Description;
-            return buffer[..buffer.IndexOf('\0')].ToString();
-        }
-    }
+    public string Description { get; }
 
     public AccessType AccessType => (AccessType)_row.AccessType;
 

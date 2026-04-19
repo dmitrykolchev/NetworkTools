@@ -12,9 +12,8 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        using var iTable = InterfaceTable.GetInterfaceTable();
-        var rows = iTable.GetEntires()
-            .Where(t => ((t.Flags & InterfaceFlags.FilterInterface) == 0))
+        var iTable = InterfaceTable.GetInterfaceTable();
+        var rows = iTable.Where(t => ((t.Flags & InterfaceFlags.FilterInterface) == 0))
             .ToArray();
 
         foreach (var row in rows)
@@ -22,9 +21,9 @@ internal class Program
             Console.WriteLine($"| {row.Index,-3} | {row.PhysicalAddressString,17} | {row.InterfaceType} | {row.MediaConnectState} | {row.ConnectionType} | {row.Alias}");
         }
 
-        using var table = RoutingTable.GetRoutingTable();
+        var table = RoutingTable.GetRoutingTable();
         var interfaceIndex = int.MinValue;
-        foreach (var entry in table.GetEntires().OrderBy(t => t.Type).ThenBy(t => t.InterfaceIndex).ThenBy(t => t.Metric))
+        foreach (var entry in table.OrderBy(t => t.Type).ThenBy(t => t.InterfaceIndex).ThenBy(t => t.Metric))
         {
             if (interfaceIndex != entry.InterfaceIndex)
             {

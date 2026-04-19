@@ -75,7 +75,7 @@ public abstract class RouteWatcher : IDisposable
             var handle = GCHandle.FromIntPtr((IntPtr)callerContext);
             if (handle.Target is RouteWatcher watcher)
             {
-                var entry = row != null ? new RoutingTableEntry(ref *row) : null;
+                RoutingTableEntry? entry = row != null ? new RoutingTableEntry(ref *row) : null;
                 // Используем TryWrite, так как канал Unbounded и всегда готов к приему
                 _ = watcher._eventChannel.Writer.TryWrite(new RouteUpdate(entry, (NotificationType)type));
             }

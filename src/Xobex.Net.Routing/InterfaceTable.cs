@@ -3,58 +3,69 @@
 // See LICENSE in the project root for license information
 // </copyright>
 
+using System.Collections;
 using Managed.Win32.IpHlpApi.Native;
 using static Managed.Win32.IpHlpApi.Native.Methods;
 
 namespace Xobex.Net.Routing;
 
-public unsafe class InterfaceTable : IDisposable
+public class InterfaceTable : IEnumerable<InterfaceEntry>
 {
-    public _MIB_IF_TABLE2* _table;
+    private InterfaceEntry[] _table;
 
-    private InterfaceTable(_MIB_IF_TABLE2* table)
+    private InterfaceTable(InterfaceEntry[] table)
     {
         ArgumentNullException.ThrowIfNull(table);
         _table = table;
     }
 
-    public int Count => (int)_table->NumEntries;
+    public int Count => _table.Length;
 
-    private ref _MIB_IF_ROW2 GetRow(uint index)
-    {
-        if (index >= Count)
-        {
-            throw new ArgumentOutOfRangeException(nameof(index), $"Index {index} is out of range. The routing table contains {Count} entries.");
-        }
-        return ref _table->Table[(int)index];
-    }
+    public ref readonly InterfaceEntry this[int index] => ref _table[index];
 
-    public static InterfaceTable GetInterfaceTable()
+    public static unsafe InterfaceTable GetInterfaceTable()
     {
-        _MIB_IF_TABLE2* table;
+        _MIB_IF_TABLE2* table = null;
         var status = GetIfTable2Ex(_MIB_IF_TABLE_LEVEL.MibIfTableNormal, &table);
         if (status != 0)
         {
             throw new InvalidOperationException($"GetIfTable2Ex failed with error code {status}");
         }
-        return new InterfaceTable(table);
-    }
-
-    public IEnumerable<InterfaceEntry> GetEntires()
-    {
-        for (uint i = 0; i < Count; i++)
+        try
         {
-            ref var row = ref GetRow(i);
-            yield return new(ref row);
+            if (table is null || table->NumEntries == 0)
+            {
+                return new InterfaceTable(Array.Empty<InterfaceEntry>());
+            }
+            // Выполняем копирование в управляемый массив сразу
+            var entries = new InterfaceEntry[table->NumEntries];
+            for (var i = 0; i < (int)table->NumEntries; i++)
+            {
+                entries[i] = new InterfaceEntry(ref table->Table[i]);
+            }
+            return new InterfaceTable(entries);
+        }
+        finally
+        {
+            if (table != null)
+            {
+                FreeMibTable(table);
+            }
         }
     }
 
-    public void Dispose()
+    public ReadOnlySpan<InterfaceEntry> AsSpan()
     {
-        if(_table != null)
-        {
-            FreeMibTable(_table);
-            _table = null;
-        }
+        return _table.AsSpan();
+    }
+
+    public IEnumerator<InterfaceEntry> GetEnumerator()
+    {
+        return ((IEnumerable<InterfaceEntry>)_table).GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return _table.GetEnumerator();
     }
 }
