@@ -2,6 +2,7 @@
   <Folder Name="/Generation/">
     <File Path="src/Wpf/generate.ps1" />
     <File Path="src/Wpf/ike.rsp" />
+    <File Path="src/Wpf/iphlpapi.c" />
     <File Path="src/Wpf/iphlpapi.rsp" />
     <File Path="src/Wpf/ipsec.rsp" />
     <File Path="src/Wpf/wfp.c" />
@@ -17,6 +18,7 @@
     <Project Path="src/Xobex.Net.Whois/Xobex.Net.Whois.csproj" Id="67f5c923-5c4f-4ef7-91ca-8c7726e3e6d5" />
   </Folder>
   <Folder Name="/src/Examples/">
+    <Project Path="src/ConnectionMonitor/ConnectionMonitor.csproj" Id="7488853d-c7d6-4891-8174-5bb9c040f1f1" />
     <Project Path="src/Route/Route.csproj" Id="5d9982a8-c1cb-4e7e-8cea-4f2c3ca9c229" />
     <Project Path="src/Whois/Whois.csproj" />
   </Folder>

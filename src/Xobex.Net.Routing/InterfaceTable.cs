@@ -11,17 +11,28 @@ namespace Xobex.Net.Routing;
 
 public class InterfaceTable : IEnumerable<InterfaceEntry>
 {
-    private InterfaceEntry[] _table;
+    private readonly InterfaceEntry[] _table;
+    private readonly Dictionary<int, InterfaceEntry> _fromInterfaceIndex;
 
     private InterfaceTable(InterfaceEntry[] table)
     {
         ArgumentNullException.ThrowIfNull(table);
         _table = table;
+        _fromInterfaceIndex = new Dictionary<int, InterfaceEntry>(table.Length);
+        for (var i = 0; i < table.Length; i++)
+        {
+            _fromInterfaceIndex.Add(table[i].Index, table[i]);
+        }
     }
 
     public int Count => _table.Length;
 
     public InterfaceEntry this[int index] => _table[index];
+
+    public InterfaceEntry? FromInderfaceIndex(int id)
+    {
+        return _fromInterfaceIndex.TryGetValue(id, out var entry) ? entry : null;
+    }
 
     public static unsafe InterfaceTable GetInterfaceTable()
     {

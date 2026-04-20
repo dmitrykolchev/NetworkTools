@@ -1,6 +1,6 @@
 --define-macro
-_WIN32_WINNT=0x0600
-WINVER=0x0600
+_WIN32_WINNT=0x0A00
+WINVER=0x0A00
 --libraryPath
 iphlpapi
 -n
@@ -8,7 +8,7 @@ Managed.Win32.IpHlpApi.Native
 -o
 ..\Managed.Wfp\Native\IpHlpApiNative.cs
 -f
-.\wfp.c
+.\iphlpapi.c
 -t
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um\iphlpapi.h
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\ifmib.h
