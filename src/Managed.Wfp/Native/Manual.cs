@@ -1,6 +1,25 @@
-﻿using System.Runtime.InteropServices;
+// <copyright file="Manual.cs" company="Dmitry Kolchev">
+// Copyright (c) 2026 Dmitry Kolchev. All rights reserved.
+// See LICENSE in the project root for license information
+// </copyright>
+
+using System.Runtime.InteropServices;
 
 namespace Managed.Win32.Native;
+
+[StructLayout(LayoutKind.Sequential)]
+public struct FILETIME
+{
+    public uint dwLowDateTime;
+    public uint dwHighDateTime;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public struct LUID
+{
+    public uint LowPart;
+    public int HighPart;
+}
 
 [System.Runtime.CompilerServices.InlineArray(14)]
 public struct ByteBuffer14
@@ -17,7 +36,6 @@ public struct sockaddr
     public ByteBuffer14 sa_data;          /* up to 14 bytes of direct address */
 };
 
-
 [StructLayout(LayoutKind.Sequential)]
 public partial struct _MIB_OPAQUE_INFO
 {
@@ -30,11 +48,13 @@ public partial struct _MIB_OPAQUE_INFO
     {
         get
         {
-            fixed (void* ptr = &ullAlign) return (byte*)ptr;
+            fixed (void* ptr = &ullAlign)
+            {
+                return (byte*)ptr;
+            }
         }
     }
 }
-
 
 [System.Runtime.CompilerServices.InlineArray(15)]
 public struct NUIntBuffer15
@@ -78,7 +98,10 @@ public unsafe struct SID
     {
         get
         {
-            fixed (int* p = &SubAuthorityFirst) return p;
+            fixed (int* p = &SubAuthorityFirst)
+            {
+                return p;
+            }
         }
     }
 }

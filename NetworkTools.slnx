@@ -14,6 +14,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Managed.Wfp/Managed.Wfp.csproj" Id="a8e312ab-543f-4896-9ff6-88d09dd12341" />
+    <Project Path="src/Managed.WinDivert/Managed.WinDivert.csproj" Id="e519d050-ccb0-4b6c-a659-c81035813b32" />
     <Project Path="src/Xobex.Net.Routing/Xobex.Net.Routing.csproj" />
     <Project Path="src/Xobex.Net.Whois/Xobex.Net.Whois.csproj" Id="67f5c923-5c4f-4ef7-91ca-8c7726e3e6d5" />
   </Folder>
