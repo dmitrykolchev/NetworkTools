@@ -3,8 +3,9 @@
 // See LICENSE in the project root for license information
 // </copyright>
 
+using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Managed.WinDivert.Native;
 using static Managed.Win32.Native.Methods;
@@ -54,7 +55,16 @@ public static unsafe class Utils
         }
     }
 
-    public static bool ParsePacket(ReadOnlySpan<byte> packet, out ReadOnlySpan<IpV4Header> ipV4Header, out ReadOnlySpan<IpV6Header> ipV6Header)
+    public static bool ParsePacket(
+        ReadOnlySpan<byte> packet,
+        out ReadOnlySpan<IpV4Header> ipv4Header,
+        out ReadOnlySpan<IpV6Header> ipv6Header,
+        out ReadOnlySpan<IcmpV4Header> icmpv4Header,
+        out ReadOnlySpan<IcmpV6Header> icmpv6Header,
+        out ReadOnlySpan<TcpHeader> tcpHeader,
+        out ReadOnlySpan<UdpHeader> udpHeader,
+        out ReadOnlySpan<byte> data
+        )
     {
         IpV4Header* ipv4HeaderPtr;
         IpV6Header* ipv6HeaderPtr;
@@ -67,7 +77,7 @@ public static unsafe class Utils
         uint dataLength;
         void* pNext;
         uint nextLength;
-        
+
         fixed (void* pPacket = packet)
         {
             var result = WinDivertHelperParsePacket(
@@ -80,17 +90,55 @@ public static unsafe class Utils
                 &pNext, &nextLength);
             if (result == FALSE)
             {
-                ipV4Header = default;
-                ipV6Header = default;
+                ipv4Header = default;
+                ipv6Header = default;
+                icmpv4Header = default;
+                icmpv6Header = default;
+                tcpHeader = default;
+                udpHeader = default;
+                data = default;
                 return false;
             }
-            ipV4Header = Get<IpV4Header>(packet, ipv4HeaderPtr, pPacket);
-            ipV6Header = Get<IpV6Header>(packet, ipv6HeaderPtr, pPacket);
+            ipv4Header = Get<IpV4Header>(packet, ipv4HeaderPtr, pPacket);
+            ipv6Header = Get<IpV6Header>(packet, ipv6HeaderPtr, pPacket);
+            icmpv4Header = Get<IcmpV4Header>(packet, icmpv4HeaderPtr, pPacket);
+            icmpv6Header = Get<IcmpV6Header>(packet, icmpv6HeaderPtr, pPacket);
+            tcpHeader = Get<TcpHeader>(packet, tcpHeaderPtr, pPacket);
+            udpHeader = Get<UdpHeader>(packet, udpHeaderPtr, pPacket);
+            if (pData != null)
+            {
+                var offset = unchecked((int)((nint)pData - (nint)pPacket));
+                data = packet.Slice(offset, (int)dataLength);
+            }
+            else
+            {
+                data = default;
+            }
         }
         return true;
     }
+    public static short NetworkToHostOrder(short n)
+    {
+        return BinaryPrimitives.ReadInt16BigEndian(MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref n, 1)));
+    }
 
-    private static ReadOnlySpan<T> Get<T>(ReadOnlySpan<byte> packet, void* position, void* start) where T: unmanaged
+    public static int NetworkToHostOrder(int n)
+    {
+        return BinaryPrimitives.ReadInt32BigEndian(MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref n, 1)));
+    }
+
+    public static ushort NetworkToHostOrder(ushort n)
+    {
+        return BinaryPrimitives.ReadUInt16BigEndian(MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref n, 1)));
+    }
+
+    public static uint NetworkToHostOrder(uint n)
+    {
+        return BinaryPrimitives.ReadUInt32BigEndian(MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref n, 1)));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ReadOnlySpan<T> Get<T>(ReadOnlySpan<byte> packet, void* position, void* start) where T : unmanaged
     {
         if (position != null)
         {
