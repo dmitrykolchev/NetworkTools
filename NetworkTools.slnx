@@ -1,4 +1,8 @@
 <Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
   <Folder Name="/Generation/">
     <File Path="src/Wpf/generate.ps1" />
     <File Path="src/Wpf/ike.rsp" />
@@ -14,7 +18,9 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Managed.Wfp/Managed.Wfp.csproj" Id="a8e312ab-543f-4896-9ff6-88d09dd12341" />
-    <Project Path="src/Managed.WinDivert/Managed.WinDivert.csproj" Id="e519d050-ccb0-4b6c-a659-c81035813b32" />
+    <Project Path="src/Managed.WinDivert/Managed.WinDivert.csproj" Id="e519d050-ccb0-4b6c-a659-c81035813b32">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
     <Project Path="src/Xobex.Net.Routing/Xobex.Net.Routing.csproj" />
     <Project Path="src/Xobex.Net.Whois/Xobex.Net.Whois.csproj" Id="67f5c923-5c4f-4ef7-91ca-8c7726e3e6d5" />
   </Folder>
@@ -22,6 +28,9 @@
     <Project Path="src/ConnectionMonitor/ConnectionMonitor.csproj" Id="7488853d-c7d6-4891-8174-5bb9c040f1f1" />
     <Project Path="src/Route/Route.csproj" Id="5d9982a8-c1cb-4e7e-8cea-4f2c3ca9c229" />
     <Project Path="src/Whois/Whois.csproj" />
+    <Project Path="src/WinDivertTest/WinDivertTest.csproj" Id="e6a6b6ac-53e1-4d5f-8f51-18cef54bcefc">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Whois.Tests/Whois.Tests.csproj" />

@@ -92,7 +92,7 @@ csharp_style_prefer_local_over_anonymous_function = true:suggestion
 csharp_prefer_static_local_function = true:suggestion
 csharp_style_conditional_delegate_call = true:suggestion
 csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
-csharp_style_unused_value_assignment_preference = discard_variable:suggestion
+csharp_style_unused_value_assignment_preference = discard_variable:false
 
 [*.{xml,config,*proj,nuspec,props,resx,targets,yml,tasks}]
 indent_size = 2
@@ -115,7 +115,6 @@ end_of_line = lf
 charset = utf-8-bom
 
 [*.{cs,vb}]
-
 # SYSLIB1054: Use 'LibraryImportAttribute' instead of 'DllImportAttribute' to generate P/Invoke marshalling code at compile time
 dotnet_diagnostic.SYSLIB1054.severity = none
 
@@ -341,7 +340,8 @@ dotnet_diagnostic.IDE0051.severity = suggestion
 dotnet_diagnostic.IDE0055.severity = suggestion
 
 # IDE0059: Unnecessary assignment to a value
-dotnet_diagnostic.IDE0059.severity = suggestion
+dotnet_diagnostic.IDE0058.severity = none
+dotnet_diagnostic.IDE0059.severity = none
 
 # IDE0060: Remove unused parameter
 dotnet_code_quality_unused_parameters = non_public:suggestion

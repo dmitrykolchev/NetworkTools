@@ -3,6 +3,9 @@
 // See LICENSE in the project root for license information
 // </copyright>
 
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Managed.Win32.Native;
@@ -133,4 +136,30 @@ public unsafe struct SEC_WINNT_AUTH_IDENTITY_W
     public ushort* Password;
     public uint PasswordLength;
     public uint Flags;
+}
+
+public static class Methods
+{
+    public const nint InvalidHandleValue = -1;
+
+    public const int FALSE = 0;
+
+    [DllImport("kernel32")]
+    public static extern uint GetLastError();
+
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ThrowWin32Error()
+    {
+        throw new Win32Exception(unchecked((int)GetLastError()));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ThrowIfWin32Error(bool predicate)
+    {
+        if (predicate)
+        {
+            throw new Win32Exception(unchecked((int)GetLastError()));
+        }
+    }
 }
