@@ -11,6 +11,8 @@
   <ItemGroup>
     <None Include="bin\x64\Debug\net10.0\WinDivert.dll" />
     <None Include="bin\x64\Debug\net10.0\WinDivert64.sys" />
+    <None Include="bin\x64\Release\net10.0\WinDivert.dll" />
+    <None Include="bin\x64\Release\net10.0\WinDivert64.sys" />
   </ItemGroup>
 
   <ItemGroup>

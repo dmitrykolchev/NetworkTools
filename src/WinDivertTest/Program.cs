@@ -40,6 +40,7 @@ internal class Program
         Span<byte> packet = stackalloc byte[0xFFFF];
         var index = 0;
         Console.Clear();
+        var localNetwork = IPNetwork.Parse("192.168.175.0/24");
         do
         {
             var address = new Address();
@@ -54,9 +55,18 @@ internal class Program
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 ref readonly var v = ref ipV4Header[0];
-                Console.WriteLine($"IPv4 [Version={v.Version} HdrLength={v.HdrLength} TOS={v.TOS} Length={v.Length} Id=0x{v.Id:X04} TTL={v.TTL} Protocol={v.Protocol}]");
-                var path = $"{new IPAddress(v.SrcAddr)} -> {new IPAddress(v.DstAddr)}";
-                Console.WriteLine($"\t{path}");
+                var srcAddress = new IPAddress(v.SrcAddr);
+                var dstAddress = new IPAddress(v.DstAddr);
+                if(srcAddress.Equals(dstAddress))
+                {
+                    continue;
+                }
+                if (!localNetwork.Contains(srcAddress) || !localNetwork.Contains(dstAddress))
+                {
+                    Console.WriteLine($"IPv4 [Version={v.Version} HdrLength={v.HdrLength} TOS={v.TOS} Length={IPAddress.NetworkToHostOrder((short)v.Length)} Id=0x{IPAddress.NetworkToHostOrder((short)v.Id):X04} TTL={v.TTL} Protocol={v.Protocol}]");
+                    var path = $"{srcAddress} -> {dstAddress}";
+                    Console.WriteLine($"\t{path}");
+                }
                 //if (traffic.TryGetValue(path, out var value))
                 //{
                 //    value += v.Length;
@@ -73,7 +83,7 @@ internal class Program
                 ref readonly var v = ref ipV6Header[0];
                 ReadOnlySpan<uint> src = v.SrcAddr;
                 ReadOnlySpan<uint> dst = v.DstAddr;
-                Console.WriteLine($"IPv6 [Version={v.Version} Length={v.Length} HopLimit={v.HopLimit}]");
+                Console.WriteLine($"IPv6 [Version={v.Version} Length={IPAddress.NetworkToHostOrder((short)v.Length)} HopLimit={v.HopLimit}]");
                 var path = $"{new IPAddress(MemoryMarshal.AsBytes(src))} -> {new IPAddress(MemoryMarshal.AsBytes(dst))}";
                 Console.WriteLine($"\t{path}");
             }

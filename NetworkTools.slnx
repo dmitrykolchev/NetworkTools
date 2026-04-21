@@ -4,6 +4,8 @@
     <Platform Name="x64" />
   </Configurations>
   <Folder Name="/Generation/">
+    <File Path="src/Generate/windivert.c" />
+    <File Path="src/Generate/windivert.rsp" />
     <File Path="src/Wpf/generate.ps1" />
     <File Path="src/Wpf/ike.rsp" />
     <File Path="src/Wpf/iphlpapi.c" />
