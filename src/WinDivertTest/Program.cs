@@ -63,15 +63,19 @@ internal class Program
 
             if (!ipV4Header.IsEmpty)
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                ref readonly var v = ref ipV4Header[0];
-                var srcAddress = new IPAddress(v.SrcAddr);
-                var dstAddress = new IPAddress(v.DstAddr);
-                var path = $"{srcAddress}:{srcPort} -> {dstAddress}:{dstPort}";
-                Console.WriteLine($"IPv4 [Version={v.Version} HdrLength={v.HdrLength} TOS={v.TOS} Length={IPAddress.NetworkToHostOrder((short)v.Length)} Id=0x{IPAddress.NetworkToHostOrder((short)v.Id):X04} TTL={v.TTL} Protocol={v.Protocol}]");
-                Console.WriteLine($"\t{path}");
+                if (dstPort == 25)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    ref readonly var v = ref ipV4Header[0];
+                    var srcAddress = new IPAddress(v.SrcAddr);
+                    var dstAddress = new IPAddress(v.DstAddr);
+                    var path = $"{srcAddress}:{srcPort} -> {dstAddress}:{dstPort}";
+                    Console.WriteLine($"IPv4 [Version={v.Version} HdrLength={v.HdrLength} TOS={v.TOS} Length={IPAddress.NetworkToHostOrder((short)v.Length)} Id=0x{IPAddress.NetworkToHostOrder((short)v.Id):X04} TTL={v.TTL} Protocol={v.Protocol}]");
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"\t{path}");
+                }
             }
-            else if (!ipV6Header.IsEmpty)
+            else if (!ipV6Header.IsEmpty && false)
             {
                 Console.ForegroundColor = ConsoleColor.Blue;
                 ref readonly var v = ref ipV6Header[0];
@@ -79,6 +83,7 @@ internal class Program
                 ReadOnlySpan<uint> dst = v.DstAddr;
                 var path = $"[{new IPAddress(MemoryMarshal.AsBytes(src))}]:{srcPort} -> [{new IPAddress(MemoryMarshal.AsBytes(dst))}]:{dstPort}";
                 Console.WriteLine($"IPv6 [Version={v.Version} Length={IPAddress.NetworkToHostOrder((short)v.Length)} HopLimit={v.HopLimit}]");
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"\t{path}");
             }
         } while (!Done);

@@ -31,6 +31,6 @@ internal sealed unsafe class SafeWinDivertHandle : SafeHandleMinusOneIsInvalid
 
     protected override bool ReleaseHandle()
     {
-        return WinDivertClose(this);
+        return WinDivertClose((void*)handle) != FALSE;
     }
 }

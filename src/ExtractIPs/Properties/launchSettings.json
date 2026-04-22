@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ExtractIPs": {
+      "commandName": "Project",
+      "commandLineArgs": "--include \"*.log\"\r\n--search-root \"C:\\Program Files (x86)\\hMailServer\\Logs\""
+    }
+  }
+}
