@@ -84,7 +84,7 @@ internal class Program
             }
             foreach (var ip in uniqueIps.OrderByDescending(t => t.Value))
             {
-                Console.WriteLine($"{ip.Key}: {ip.Value}");
+                Console.WriteLine($"| {ip.Key,-16} | {ip.Value,6} |");
             }
         }
     }
