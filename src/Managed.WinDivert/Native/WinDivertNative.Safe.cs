@@ -14,42 +14,42 @@ public static unsafe partial class Methods
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     [return: NativeTypeName("BOOL")]
-    internal static unsafe partial bool WinDivertRecv([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, void* pPacket, uint packetLen, uint* pRecvLen, [NativeTypeName("WINDIVERT_ADDRESS *")] Address* pAddr);
+    internal static partial bool WinDivertRecv([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, void* pPacket, uint packetLen, uint* pRecvLen, [NativeTypeName("WINDIVERT_ADDRESS *")] Address* pAddr);
 
     [LibraryImport("windivert", SetLastError = true)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     [return: NativeTypeName("BOOL")]
-    internal static unsafe partial bool WinDivertRecvEx([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, void* pPacket, uint packetLen, uint* pRecvLen, [NativeTypeName("UINT64")] ulong flags, [NativeTypeName("WINDIVERT_ADDRESS *")] Address* pAddr, uint* pAddrLen, [NativeTypeName("LPOVERLAPPED")] _OVERLAPPED* lpOverlapped);
+    internal static partial bool WinDivertRecvEx([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, void* pPacket, uint packetLen, uint* pRecvLen, [NativeTypeName("UINT64")] ulong flags, [NativeTypeName("WINDIVERT_ADDRESS *")] Address* pAddr, uint* pAddrLen, [NativeTypeName("LPOVERLAPPED")] _OVERLAPPED* lpOverlapped);
 
     [LibraryImport("windivert", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     [return: NativeTypeName("BOOL")]
-    internal static unsafe partial bool WinDivertSend([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, [NativeTypeName("const void *")] void* pPacket, uint packetLen, uint* pSendLen, [NativeTypeName("const WINDIVERT_ADDRESS *")] Address* pAddr);
+    internal static partial bool WinDivertSend([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, [NativeTypeName("const void *")] void* pPacket, uint packetLen, uint* pSendLen, [NativeTypeName("const WINDIVERT_ADDRESS *")] Address* pAddr);
 
     [LibraryImport("windivert", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     [return: NativeTypeName("BOOL")]
-    internal static unsafe partial bool WinDivertSendEx([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, [NativeTypeName("const void *")] void* pPacket, uint packetLen, uint* pSendLen, [NativeTypeName("UINT64")] ulong flags, [NativeTypeName("const WINDIVERT_ADDRESS *")] Address* pAddr, uint addrLen, [NativeTypeName("LPOVERLAPPED")] _OVERLAPPED* lpOverlapped);
+    internal static partial bool WinDivertSendEx([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, [NativeTypeName("const void *")] void* pPacket, uint packetLen, uint* pSendLen, [NativeTypeName("UINT64")] ulong flags, [NativeTypeName("const WINDIVERT_ADDRESS *")] Address* pAddr, uint addrLen, [NativeTypeName("LPOVERLAPPED")] _OVERLAPPED* lpOverlapped);
 
     [LibraryImport("windivert", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     [return: NativeTypeName("BOOL")]
-    internal static unsafe partial bool WinDivertShutdown([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, WINDIVERT_SHUTDOWN how);
+    internal static partial bool WinDivertShutdown([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, WINDIVERT_SHUTDOWN how);
 
     [LibraryImport("windivert", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     [return: NativeTypeName("BOOL")]
-    internal static unsafe partial bool WinDivertClose([NativeTypeName("HANDLE")] SafeWinDivertHandle handle);
+    internal static partial bool WinDivertClose([NativeTypeName("HANDLE")] SafeWinDivertHandle handle);
 
     [LibraryImport("windivert", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     [return: NativeTypeName("BOOL")]
-    internal static unsafe partial bool WinDivertSetParam([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, WINDIVERT_PARAM param1, [NativeTypeName("UINT64")] ulong value);
+    internal static partial bool WinDivertSetParam([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, WINDIVERT_PARAM param1, [NativeTypeName("UINT64")] ulong value);
 
     [LibraryImport("windivert", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     [return: NativeTypeName("BOOL")]
-    internal static unsafe partial bool WinDivertGetParam([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, WINDIVERT_PARAM param1, [NativeTypeName("UINT64 *")] ulong* pValue);
+    internal static partial bool WinDivertGetParam([NativeTypeName("HANDLE")] SafeWinDivertHandle handle, WINDIVERT_PARAM param1, [NativeTypeName("UINT64 *")] ulong* pValue);
 
 }
