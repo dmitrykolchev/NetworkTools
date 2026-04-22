@@ -6,14 +6,14 @@
   <Folder Name="/Generation/">
     <File Path="src/Generate/windivert.c" />
     <File Path="src/Generate/windivert.rsp" />
-    <File Path="src/Wpf/generate.ps1" />
-    <File Path="src/Wpf/ike.rsp" />
-    <File Path="src/Wpf/iphlpapi.c" />
-    <File Path="src/Wpf/iphlpapi.rsp" />
-    <File Path="src/Wpf/ipsec.rsp" />
-    <File Path="src/Wpf/wfp.c" />
-    <File Path="src/Wpf/wfp.rsp" />
-    <File Path="src/Wpf/winbase.rsp" />
+    <File Path="src/Generate/generate.ps1" />
+    <File Path="src/Generate/ike.rsp" />
+    <File Path="src/Generate/iphlpapi.c" />
+    <File Path="src/Generate/iphlpapi.rsp" />
+    <File Path="src/Generate/ipsec.rsp" />
+    <File Path="src/Generate/wfp.c" />
+    <File Path="src/Generate/wfp.rsp" />
+    <File Path="src/Generate/winbase.rsp" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />

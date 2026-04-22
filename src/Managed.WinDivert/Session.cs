@@ -55,52 +55,46 @@ public unsafe class Session : IDisposable
 
     public void SetParameterValue(SessionParameter parameter, ulong value)
     {
-        _handle.ThrowIfInvalid();
-        ThrowIfWin32Error(WinDivertSetParam(_handle.DangerousGetHandle().ToPointer(), (WINDIVERT_PARAM)parameter, value) == FALSE);
+        ThrowIfWin32Error(!WinDivertSetParam(_handle, (WINDIVERT_PARAM)parameter, value));
     }
 
     public ulong GetParameterValue(SessionParameter parameter)
     {
-        _handle.ThrowIfInvalid();
         ulong value;
-        ThrowIfWin32Error(WinDivertGetParam(_handle.DangerousGetHandle().ToPointer(), (WINDIVERT_PARAM)parameter, &value) == FALSE);
+        ThrowIfWin32Error(!WinDivertGetParam(_handle, (WINDIVERT_PARAM)parameter, &value));
         return value;
     }
 
     public void Shutdown(ShutdownFlags flags = ShutdownFlags.Both)
     {
-        _handle.ThrowIfInvalid(); 
-        ThrowIfWin32Error(WinDivertShutdown(_handle.DangerousGetHandle().ToPointer(), (WINDIVERT_SHUTDOWN)flags) == FALSE);
+        ThrowIfWin32Error(!WinDivertShutdown(_handle, (WINDIVERT_SHUTDOWN)flags));
     }
 
     public void Close()
     {
-        _handle.ThrowIfInvalid();
         _handle.Close();
     }
 
     public int Receive(Span<byte> packet, ref Address address)
     {
-        _handle.ThrowIfInvalid();
         fixed (void* ptr = packet)
         fixed (Address* pAddress = &address)
         {
             uint recvLength = 0;
-            var result = WinDivertRecv(_handle.DangerousGetHandle().ToPointer(), ptr, unchecked((uint)packet.Length), &recvLength, pAddress);
-            ThrowIfWin32Error(result == FALSE);
+            var result = WinDivertRecv(_handle, ptr, unchecked((uint)packet.Length), &recvLength, pAddress);
+            ThrowIfWin32Error(!result);
             return unchecked((int)recvLength);
         }
     }
 
     public int Send(ReadOnlySpan<byte> packet, ref Address address)
     {
-        _handle.ThrowIfInvalid();
         fixed (void* ptr = packet)
         fixed (Address* pAddress = &address)
         {
             uint sentLength = 0;
-            var result = WinDivertSend(_handle.DangerousGetHandle().ToPointer(), ptr, unchecked((uint)packet.Length), &sentLength, pAddress);
-            ThrowIfWin32Error(result == FALSE);
+            var result = WinDivertSend(_handle, ptr, unchecked((uint)packet.Length), &sentLength, pAddress);
+            ThrowIfWin32Error(!result);
             return unchecked((int)sentLength);
         }
     }

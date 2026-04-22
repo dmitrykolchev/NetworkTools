@@ -140,18 +140,13 @@ public unsafe struct SEC_WINNT_AUTH_IDENTITY_W
 
 public static class Methods
 {
-    public const nint InvalidHandleValue = -1;
-
     public const int FALSE = 0;
-
-    [DllImport("kernel32")]
-    public static extern uint GetLastError();
 
     [DoesNotReturn]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ThrowWin32Error()
     {
-        throw new Win32Exception(unchecked((int)GetLastError()));
+        throw new Win32Exception(Marshal.GetLastPInvokeError());
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -159,7 +154,7 @@ public static class Methods
     {
         if (predicate)
         {
-            throw new Win32Exception(unchecked((int)GetLastError()));
+            throw new Win32Exception(Marshal.GetLastPInvokeError());
         }
     }
 }

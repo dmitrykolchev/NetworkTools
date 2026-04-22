@@ -13,7 +13,6 @@ namespace WinDivertTest;
 internal class Program
 {
     private static bool Done;
-    private static HashSet<string> items = new();
 
     private static void Main(string[] args)
     {
@@ -69,11 +68,8 @@ internal class Program
                 var srcAddress = new IPAddress(v.SrcAddr);
                 var dstAddress = new IPAddress(v.DstAddr);
                 var path = $"{srcAddress}:{srcPort} -> {dstAddress}:{dstPort}";
-                if (items.Add(path))
-                {
-                    Console.WriteLine($"IPv4 [Version={v.Version} HdrLength={v.HdrLength} TOS={v.TOS} Length={IPAddress.NetworkToHostOrder((short)v.Length)} Id=0x{IPAddress.NetworkToHostOrder((short)v.Id):X04} TTL={v.TTL} Protocol={v.Protocol}]");
-                    Console.WriteLine($"\t{path}");
-                }
+                Console.WriteLine($"IPv4 [Version={v.Version} HdrLength={v.HdrLength} TOS={v.TOS} Length={IPAddress.NetworkToHostOrder((short)v.Length)} Id=0x{IPAddress.NetworkToHostOrder((short)v.Id):X04} TTL={v.TTL} Protocol={v.Protocol}]");
+                Console.WriteLine($"\t{path}");
             }
             else if (!ipV6Header.IsEmpty)
             {
@@ -82,11 +78,8 @@ internal class Program
                 ReadOnlySpan<uint> src = v.SrcAddr;
                 ReadOnlySpan<uint> dst = v.DstAddr;
                 var path = $"[{new IPAddress(MemoryMarshal.AsBytes(src))}]:{srcPort} -> [{new IPAddress(MemoryMarshal.AsBytes(dst))}]:{dstPort}";
-                if (items.Add(path))
-                {
-                    Console.WriteLine($"IPv6 [Version={v.Version} Length={IPAddress.NetworkToHostOrder((short)v.Length)} HopLimit={v.HopLimit}]");
-                    Console.WriteLine($"\t{path}");
-                }
+                Console.WriteLine($"IPv6 [Version={v.Version} Length={IPAddress.NetworkToHostOrder((short)v.Length)} HopLimit={v.HopLimit}]");
+                Console.WriteLine($"\t{path}");
             }
         } while (!Done);
         session.Shutdown();
