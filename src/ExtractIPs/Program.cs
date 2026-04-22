@@ -13,13 +13,13 @@ internal class Program
 {
     private static readonly Option<IEnumerable<string>> _includeOption = new("--include", "-i")
     {
-        Description = "Путь к файлу логов",
+        Description = "Include patterns for files to search",
         Required = true,
         Arity = ArgumentArity.OneOrMore
     };
     private static readonly Option<IEnumerable<string>> _excludeOption = new("--exclude", "-e")
     {
-        Description = "Путь к файлу логов",
+        Description = "Exclude patterns for files to search",
         Required = false,
         Arity = ArgumentArity.OneOrMore
     };
@@ -31,7 +31,7 @@ internal class Program
     };
     private static readonly Option<string> _searchTargetOption = new("--search-target", "-s")
     {
-        Description = "Фраза для поиска в логах",
+        Description = "The phrase to search for in the log files",
         Required = false,
         DefaultValueFactory = (_) => "535 Authentication failed. Too many invalid logon attempts."
     };
@@ -41,13 +41,17 @@ internal class Program
         _includeOption,
         _excludeOption,
         _searchRootOption,
-        _searchTargetOption
+        _searchTargetOption,
     };
 
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
-        var parseResult = _rootCommand.Parse(args);
+        _rootCommand.SetAction(InvokeRootCommand);
+        await _rootCommand.Parse(args).InvokeAsync();
+    }
 
+    private static void InvokeRootCommand(ParseResult parseResult)
+    {
         var includePatterns = parseResult.GetValue(_includeOption)!;
         var excludePatterns = parseResult.GetValue(_excludeOption);
         var searchRoot = parseResult.GetValue(_searchRootOption)!;
