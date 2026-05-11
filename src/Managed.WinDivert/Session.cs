@@ -50,7 +50,10 @@ public unsafe class Session : IDisposable
 
     public void Open(ReadOnlySpan<byte> compiledFilter, Layer layer = Layer.Network, short priority = 0, SessionFlags flags = SessionFlags.None)
     {
-        _handle = SafeWinDivertHandle.Open(compiledFilter, layer, priority, flags);
+        if (!SafeWinDivertHandle.TryOpen(compiledFilter, layer, priority, flags, out _handle))
+        {
+            ThrowWin32Error();
+        }
     }
 
     public void SetParameterValue(SessionParameter parameter, ulong value)

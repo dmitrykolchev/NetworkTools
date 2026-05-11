@@ -3,7 +3,6 @@
 // See LICENSE in the project root for license information
 // </copyright>
 
-using System.Runtime.CompilerServices;
 using Microsoft.Win32.SafeHandles;
 using static Managed.Win32.Native.Methods;
 using static Managed.WinDivert.Native.Methods;
@@ -12,25 +11,38 @@ namespace Managed.WinDivert.Native;
 
 internal sealed unsafe class SafeWinDivertHandle : SafeHandleMinusOneIsInvalid
 {
+    private const nint InvalidHandleValue = -1;
+
     public SafeWinDivertHandle() : base(true)
     {
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static SafeWinDivertHandle Open(ReadOnlySpan<byte> compiledFilter, Layer layer, short priority, SessionFlags flags)
+    public static bool TryOpen(ReadOnlySpan<byte> compiledFilter, Layer layer, short priority, SessionFlags flags, out SafeWinDivertHandle handle)
     {
-        var handle = new SafeWinDivertHandle();
+        handle = new SafeWinDivertHandle();
         fixed (byte* ptr = compiledFilter)
         {
+            // Здесь теоретически может возникать утечка, если WinDivertOpen() будет вызван
+            // и после этого произойдет исключение, непонятно как его отловить, так как мы не
+            // можем использовать try/catch внутри unsafe кода.
             var session = WinDivertOpen((sbyte*)ptr, (WINDIVERT_LAYER)layer, priority, (ulong)flags);
+            if ((nint)session == InvalidHandleValue)
+            {
+                // SetHandleAsInvalid() must suppress handle finalizer
+                handle.SetHandleAsInvalid();
+                return false;
+            }
             handle.SetHandle((nint)session);
-            ThrowIfWin32Error(handle.IsInvalid);
+            return true;
         }
-        return handle;
     }
 
     protected override bool ReleaseHandle()
     {
+        if (handle == InvalidHandleValue || handle == IntPtr.Zero)
+        {
+            return true;
+        }
         return WinDivertClose((void*)handle) != FALSE;
     }
 }

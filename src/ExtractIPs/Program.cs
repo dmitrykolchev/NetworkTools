@@ -21,7 +21,7 @@ internal class Program
     {
         Description = "Exclude patterns for files to search",
         Required = false,
-        Arity = ArgumentArity.OneOrMore
+        Arity = ArgumentArity.ZeroOrMore
     };
     private static readonly Option<string> _searchRootOption = new("--search-root", "-r")
     {
@@ -86,9 +86,14 @@ internal class Program
                     }
                 }
             }
-            foreach (var ip in uniqueIps.OrderByDescending(t => t.Value))
+            foreach (var ip in uniqueIps.OrderBy(t => ToIPv4Int(t.Key)))
             {
                 Console.WriteLine($"| {ip.Key,-16} | {ip.Value,6} |");
+            }
+            static long ToIPv4Int(string ip)
+            {
+                var parts = ip.Split('.').Select(byte.Parse).ToArray();
+                return (long)parts[0] << 24 | (long)parts[1] << 16 | (long)parts[2] << 8 | parts[3];
             }
         }
     }

@@ -1,4 +1,9 @@
-﻿using System.Net;
+// <copyright file="WhoisClient.cs" company="Dmitry Kolchev">
+// Copyright (c) 2026 Dmitry Kolchev. All rights reserved.
+// See LICENSE in the project root for license information
+// </copyright>
+
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -71,8 +76,10 @@ public partial class WhoisClient
         _port = port;
     }
 
-    public Task<string> QueryAsync(string query) =>
-        QueryAsync(query, CancellationToken.None);
+    public Task<string> QueryAsync(string query)
+    {
+        return QueryAsync(query, CancellationToken.None);
+    }
 
     /// <summary>
     /// Performs an asynchronous WHOIS query for the provided query string starting
@@ -92,8 +99,10 @@ public partial class WhoisClient
         return QueryRecursiveAsync(_initialServer, _port, query, 0, cancellationToken);
     }
 
-    public Task<string> QueryAsync(IPAddress address) =>
-        QueryAsync(address, CancellationToken.None);
+    public Task<string> QueryAsync(IPAddress address)
+    {
+        return QueryAsync(address, CancellationToken.None);
+    }
 
     /// <summary>
     /// Performs an asynchronous WHOIS query for the provided IP address starting
@@ -125,7 +134,7 @@ public partial class WhoisClient
     /// <exception cref="System.Net.Sockets.SocketException">Thrown for socket-level errors during connect or write/read.</exception>
     private static async Task<string> QueryRecursiveAsync(string server, int port, string query, int depth, CancellationToken cancellationToken)
     {
-        string response = await SendRequestAsync(server, port, query, cancellationToken);
+        var response = await SendRequestAsync(server, port, query, cancellationToken).ConfigureAwait(false);
 
         // Ограничение глубины рекурсии перенаправлений
         if (depth >= MaxReferralDepth)
@@ -165,17 +174,19 @@ public partial class WhoisClient
     {
         using var client = new TcpClient();
         // Устанавливаем тайм-аут на подключение и на чтение, чтобы не ждать вечно
-        await client.ConnectAsync(server, port).WaitAsync(TimeSpan.FromMilliseconds(ConnectTimeout), cancellationToken);
+        await client.ConnectAsync(server, port)
+            .WaitAsync(TimeSpan.FromMilliseconds(ConnectTimeout), cancellationToken)
+            .ConfigureAwait(false);
         client.ReceiveTimeout = ReceiveTimeout;
         client.SendTimeout = ConnectTimeout;
 
-        using NetworkStream stream = client.GetStream();
+        using var stream = client.GetStream();
         var queryBytes = Encoding.ASCII.GetBytes($"{query}\r\n");
         await stream.WriteAsync(queryBytes, cancellationToken);
 
         // Большинство whois-серверов используют ASCII/Latin1. Читаем как ASCII для предсказуемости.
         using var reader = new StreamReader(stream, Encoding.ASCII);
-        var response = await reader.ReadToEndAsync(cancellationToken);
+        var response = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
         return response;
     }
 
@@ -225,11 +236,11 @@ public partial class WhoisClient
                 _ = comments.AppendLine(line);
                 continue;
             }
-            int index = line.IndexOf(':');
+            var index = line.IndexOf(':');
             if (index > 0)
             {
-                string key = line[..index].Trim();
-                string value = line[(index + 1)..].Trim();
+                var key = line[..index].Trim();
+                var value = line[(index + 1)..].Trim();
                 result[key] = value;
             }
         }
